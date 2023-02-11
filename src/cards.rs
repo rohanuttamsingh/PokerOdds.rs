@@ -14,8 +14,8 @@ pub struct Card {
 
 impl Card {
     pub fn build(suit: Suit, value: u8) -> Result<Card, &'static str> {
-        if !(1..=13).contains(&value) {
-            return Err("Value must be between 1 (Ace) and 13 (King)");
+        if !(2..=14).contains(&value) {
+            return Err("Value must be between 2 (Two) and 14 (Ace)");
         }
         Ok(Card { suit, value })
     }
@@ -91,7 +91,7 @@ pub fn best_hand(mut hand: [Card; 5]) -> Hand {
     };
     let high_card = hand[4].value;
 
-    if is_flush && values == vec![1, 10, 11, 12, 13] {
+    if is_straight && is_flush && high_card == 14 {
         Hand::RoyalFlush
     } else if is_straight && is_flush {
         Hand::StraightFlush(high_card)
@@ -121,7 +121,7 @@ mod tests {
     #[test]
     fn valid_card() {
         for suit in [Suit::Spades, Suit::Diamonds, Suit::Clubs, Suit::Hearts] {
-            for value in 1..=13 {
+            for value in 2..=14 {
                 match Card::build(suit, value) {
                     Ok(_) => (),
                     Err(_) => panic!("{suit:?} {value} should be a valid card"),
@@ -157,7 +157,7 @@ mod tests {
         assert_eq!(best_hand([
             Card { suit: Suit::Clubs, value: 10 },
             Card { suit: Suit::Clubs, value: 13 },
-            Card { suit: Suit::Clubs, value: 1 },
+            Card { suit: Suit::Clubs, value: 14 },
             Card { suit: Suit::Clubs, value: 12 },
             Card { suit: Suit::Clubs, value: 11 },
         ]), Hand::RoyalFlush);
@@ -184,11 +184,11 @@ mod tests {
         ]), Hand::FullHouse(8, 3));
         assert_eq!(best_hand([
             Card { suit: Suit::Clubs, value: 13 },
-            Card { suit: Suit::Clubs, value: 1 },
+            Card { suit: Suit::Clubs, value: 14 },
             Card { suit: Suit::Clubs, value: 8 },
             Card { suit: Suit::Clubs, value: 9 },
             Card { suit: Suit::Clubs, value: 4 },
-        ]), Hand::Flush(13));
+        ]), Hand::Flush(14));
         assert_eq!(best_hand([
             Card { suit: Suit::Diamonds, value: 10 },
             Card { suit: Suit::Hearts, value: 9 },
@@ -197,12 +197,12 @@ mod tests {
             Card { suit: Suit::Diamonds, value: 8 },
         ]), Hand::Straight(10));
         assert_eq!(best_hand([
-            Card { suit: Suit::Spades, value: 1 },
+            Card { suit: Suit::Spades, value: 14 },
             Card { suit: Suit::Spades, value: 2 },
-            Card { suit: Suit::Clubs, value: 1 },
+            Card { suit: Suit::Clubs, value: 14 },
             Card { suit: Suit::Diamonds, value: 9 },
-            Card { suit: Suit::Hearts, value: 1 },
-        ]), Hand::ThreeOfAKind(1));
+            Card { suit: Suit::Hearts, value: 14 },
+        ]), Hand::ThreeOfAKind(14));
         assert_eq!(best_hand([
             Card { suit: Suit::Diamonds, value: 11},
             Card { suit: Suit::Spades, value: 11},
@@ -221,7 +221,7 @@ mod tests {
             Card {suit: Suit::Clubs, value: 8 },
             Card {suit: Suit::Clubs, value: 7 },
             Card {suit: Suit::Hearts, value: 3 },
-            Card {suit: Suit::Diamonds, value: 1 },
+            Card {suit: Suit::Diamonds, value: 2 },
             Card {suit: Suit::Spades, value: 4 },
         ]), Hand::HighCard(8));
     }
