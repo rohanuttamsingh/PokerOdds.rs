@@ -51,7 +51,7 @@ pub fn best_hand(mut hand: [Card; 5]) -> Hand {
         Some(_) => false,
         None => true,
     };
-    let (is_four, quads) = match values.iter().as_slice().windows(4).any(|w| w.iter().all(|x| *x == w[0])) {
+    let (is_four, quads) = match values.iter().as_slice().windows(4).any(|w| is_all_same_value(w)) {
         true => (true, Some(values[2])),
         false => (false, None),
     };
@@ -64,7 +64,7 @@ pub fn best_hand(mut hand: [Card; 5]) -> Hand {
             (false, None, None)
         }
     };
-    let (is_three, three_trips) = match values.iter().as_slice().windows(3).any(|w| w.iter().all(|x| *x == w[0])) {
+    let (is_three, three_trips) = match values.iter().as_slice().windows(3).any(|w| is_all_same_value(w)) {
         true => (true, Some(values[2])),
         false => (false, None),
     };
