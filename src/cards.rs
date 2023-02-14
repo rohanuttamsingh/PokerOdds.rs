@@ -43,7 +43,7 @@ pub fn best_hand(mut hand: [Card; 5]) -> Hand {
     hand.sort_by(|a, b| a.value.partial_cmp(&b.value).unwrap());
     let values: Vec<u8> = hand.iter().map(|x| x.value).collect();
     let suits: Vec<Suit> = hand.iter().map(|x| x.suit).collect();
-    let is_straight = match values.iter().as_slice().windows(2).position(|w| w[0] + 1 != w[1]) {
+    let is_straight = values.as_slice() == [2, 3, 4, 5, 14] || match values.iter().as_slice().windows(2).position(|w| w[0] + 1 != w[1]) {
         Some(_) => false,
         None => true,
     };
@@ -190,12 +190,12 @@ mod tests {
             Card { suit: Suit::Clubs, value: 4 },
         ]), Hand::Flush(14));
         assert_eq!(best_hand([
-            Card { suit: Suit::Diamonds, value: 10 },
-            Card { suit: Suit::Hearts, value: 9 },
-            Card { suit: Suit::Spades, value: 6 },
-            Card { suit: Suit::Diamonds, value: 7 },
-            Card { suit: Suit::Diamonds, value: 8 },
-        ]), Hand::Straight(10));
+            Card { suit: Suit::Diamonds, value: 2 },
+            Card { suit: Suit::Hearts, value: 14 },
+            Card { suit: Suit::Spades, value: 3 },
+            Card { suit: Suit::Diamonds, value: 5 },
+            Card { suit: Suit::Diamonds, value: 4 },
+        ]), Hand::Straight(14));
         assert_eq!(best_hand([
             Card { suit: Suit::Spades, value: 14 },
             Card { suit: Suit::Spades, value: 2 },
