@@ -6,7 +6,7 @@ pub enum Suit {
     Hearts,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Card {
     suit: Suit,
     value: u8,
@@ -111,6 +111,37 @@ pub fn best_hand(mut hand: [Card; 5]) -> Hand {
         Hand::Pair(pair.unwrap())
     } else {
         Hand::HighCard(high_card)
+    }
+}
+
+pub struct Game {
+    hole: [Card; 2],
+    flop: [Card; 3],
+    turn: Option<Card>,
+    river: Option<Card>,
+}
+
+impl Game {
+    fn get_unused_cards(&self) -> Vec<Card> {
+        let mut unused_cards: Vec<Card> = Vec::new();
+        let mut used_cards: Vec<Card> = Vec::new();
+        used_cards.extend(self.hole);
+        used_cards.extend(self.flop);
+        if let Some(turn) = self.turn {
+            used_cards.push(turn);
+        }
+        if let Some(river) = self.river {
+            used_cards.push(river);
+        }
+        for suit in [Suit::Spades, Suit::Diamonds, Suit::Clubs, Suit::Hearts] {
+            for value in 2..=14 {
+                let current_card = Card::build(suit, value).unwrap();
+                if !used_cards.contains(&current_card) {
+                    unused_cards.push(current_card);
+                }
+            }
+        }
+        unused_cards
     }
 }
 
@@ -224,5 +255,42 @@ mod tests {
             Card {suit: Suit::Diamonds, value: 2 },
             Card {suit: Suit::Spades, value: 4 },
         ]), Hand::HighCard(8));
+    }
+
+    #[test]
+    fn test_get_unused_cards() {
+        let hole = [Card { suit: Suit::Diamonds, value: 12 }, Card { suit: Suit::Clubs, value: 11 }];
+        let flop = [Card { suit: Suit::Spades, value: 10 }, Card { suit: Suit::Hearts, value: 8 }, Card { suit: Suit::Clubs, value: 3 }];
+        let game = Game { hole, flop, turn: None, river: None };
+        let unused_cards = game.get_unused_cards();
+        for hole_card in hole {
+            assert!(!unused_cards.contains(&hole_card));
+        }
+        for flop_card in flop {
+            assert!(!unused_cards.contains(&flop_card));
+        }
+
+        let turn = Card { suit: Suit::Diamonds, value: 2 };
+        let game = Game { hole, flop, turn: Some(turn), river: None };
+        let unused_cards = game.get_unused_cards();
+        for hole_card in hole {
+            assert!(!unused_cards.contains(&hole_card));
+        }
+        for flop_card in flop {
+            assert!(!unused_cards.contains(&flop_card));
+        }
+        assert!(!unused_cards.contains(&turn));
+
+        let river = Card { suit: Suit::Clubs, value: 7 };
+        let game = Game {hole, flop, turn: Some(turn), river: Some(river) };
+        let unused_cards = game.get_unused_cards();
+        for hole_card in hole {
+            assert!(!unused_cards.contains(&hole_card));
+        }
+        for flop_card in flop {
+            assert!(!unused_cards.contains(&flop_card));
+        }
+        assert!(!unused_cards.contains(&turn));
+        assert!(!unused_cards.contains(&river));
     }
 }
